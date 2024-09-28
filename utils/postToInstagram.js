@@ -27,7 +27,6 @@ const postToInsta = async (IG_USERNAME, IG_PASSWORD) => {
 };
 
 
-postToInsta("2.planet.69","anmolanmol@123");
 
 
-// export default postToInsta;
+export default postToInsta;
