@@ -1,30 +1,36 @@
-import express from 'express';
-import connectDB from './config/db.js';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import userRoutes from './routes/userRoutes.js';
+import express from "express";
+import connectDB from "./config/db.js";
+import cors from "cors";
+import dotenv from "dotenv";
+import userRoutes from "./routes/userRoutes.js";
+import campaignRoute from "./routes/campaignRoutes.js"
+import socialRoute from "./routes/socialRoutes.js"
+import bodyParser from "body-parser";
+
+import findAgents from "./utils/findAgents.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to the database
 connectDB();
 
-// Middleware
-app.use(express.json()); // Built-in body-parser to handle JSON requests
-app.use(cors()); // Enable CORS
+app.use(bodyParser.json({ limit: '100mb' })); // Increase limit for JSON
+app.use(bodyParser.urlencoded({ limit: '100mb', extended: true })); // Increase limit for URL-encoded data
 
-// Routes
-app.use('/api/users', userRoutes); // User authentication and details routes
 
-// Root route
-app.get('/', (req, res) => {
-  res.send('API is running...');
+app.use(express.json()); 
+app.use(cors());
+
+app.use("/api/users", userRoutes);
+app.use("/api/campaigns", campaignRoute);
+app.use("/api/social", socialRoute);
+
+app.get("/", (req, res) => {
+  res.send("API is running...");
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
