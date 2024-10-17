@@ -12,7 +12,8 @@ const campaignSchema = new Schema({
   agents: [
     {
       userId: { type: Schema.Types.ObjectId, ref: 'User' },
-      affiliatedLink: { type: String }
+      affiliatedLink: { type: String },
+      accepted:{type:Boolean,default:false}
     }
   ],  // List of agents with their affiliate links
   owner: { type: Schema.Types.ObjectId, ref: 'User', required: true }  // Campaign owner (userId)

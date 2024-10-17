@@ -1,6 +1,9 @@
 import User from "../models/User.js";
+import Metrics from "../models/Metrics.js";
 import Campaign from "../models/Campaign.js";
 import findAgents from "../utils/findAgents.js";
+import calculatePayout from "../utils/paymentUtils.js";
+
 
 export const createCampaign = async (req, res) => {
   const {
@@ -117,9 +120,37 @@ export const getCampaignsByAgentId = async (req, res) => {
       });
     }
 
+    // Map over campaigns and append the isAccepted status for the specific agent
+    const campaignsWithStatus = await Promise.all(
+      campaigns.map(async (campaign) => {
+        const agentData = campaign.agents.find(
+          (agent) => agent.userId.toString() === agentId.toString()
+        );
+        
+        // Create the campaign object with isAccepted field
+        let campaignData = {
+          ...campaign._doc, // Spread the campaign data
+          isAccepted: agentData ? agentData.accepted : false, // Add isAccepted field based on agent's status
+        };
+
+        // If the campaign is accepted, fetch the metrics for that campaign and agent
+        if (campaignData.isAccepted) {
+          const metrics = await Metrics.findOne({
+            agentId,
+            campaignId: campaign._id,
+          });
+          
+          // Attach the metrics info if found
+          campaignData.metrics = metrics || null; // Attach the metrics data if found, or null if not
+        }
+
+        return campaignData; // Return the campaign data with status and possibly metrics
+      })
+    );
+
     res.status(200).json({
       message: "Campaigns retrieved successfully!",
-      campaigns,
+      campaigns: campaignsWithStatus,
     });
   } catch (err) {
     console.error(err);
@@ -129,6 +160,7 @@ export const getCampaignsByAgentId = async (req, res) => {
     });
   }
 };
+
 
 export const removeAgentFromCampaign = async (req, res) => {
   const { campaignId } = req.params;
@@ -170,3 +202,9 @@ export const removeAgentFromCampaign = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+

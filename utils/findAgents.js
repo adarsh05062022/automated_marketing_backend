@@ -28,7 +28,6 @@ const findAgents = async (userId) => {
     // Step 3: Create an array of userIds and affiliate links for the agents
     const agentArray = agents.map(agent => ({
       userId: agent._id,
-      affiliatedLink: `https://affiliate.link/${agent._id}`  // Example affiliate link format
     }));
 
     return agentArray;

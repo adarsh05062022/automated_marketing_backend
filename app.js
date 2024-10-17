@@ -5,7 +5,9 @@ import dotenv from "dotenv";
 import userRoutes from "./routes/userRoutes.js";
 import campaignRoute from "./routes/campaignRoutes.js"
 import socialRoute from "./routes/socialRoutes.js"
+import metricsRoutes from "./routes/metricsRoutes.js"
 import bodyParser from "body-parser";
+
 
 import findAgents from "./utils/findAgents.js";
 
@@ -26,6 +28,8 @@ app.use(cors());
 app.use("/api/users", userRoutes);
 app.use("/api/campaigns", campaignRoute);
 app.use("/api/social", socialRoute);
+app.use("/api/metrics", metricsRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("API is running...");

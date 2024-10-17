@@ -5,8 +5,9 @@ import {
   getCampaignsByOwnerId,
   getCampaignById,
   getCampaignsByAgentId,
-  removeAgentFromCampaign,
+  removeAgentFromCampaign
 } from '../controllers/campaignController.js';
+import { automaticallyPost } from '../controllers/automatedPostingController.js';
 
 const router = express.Router();
 
@@ -17,5 +18,10 @@ router.get('/campaign/:id', protect, getCampaignById);
 router.get('/agent',protect, getCampaignsByAgentId);
 // DELETE route for an agent to remove themselves from a campaign
 router.delete('/remove-agent/:campaignId', protect, removeAgentFromCampaign);
+
+router.post('/accept/campaign/:campaignId',protect,automaticallyPost)
+
+
+
 
 export default router;
