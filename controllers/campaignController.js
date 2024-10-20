@@ -55,11 +55,11 @@ export const getCampaignsByOwnerId = async (req, res) => {
   const userId = req.user._id;
 
   try {
+    // Find the campaigns owned by the user
     const campaigns = await Campaign.find({ owner: userId }).populate({
       path: "agents.userId",
       model: "User",
       select: "username",
-      strictPopulate: false,
     });
 
     if (!campaigns || campaigns.length === 0) {
@@ -68,9 +68,35 @@ export const getCampaignsByOwnerId = async (req, res) => {
       });
     }
 
+    // Fetch metrics for each campaign and agent
+    const campaignsWithMetrics = await Promise.all(
+      campaigns.map(async (campaign) => {
+        const updatedAgents = await Promise.all(
+          campaign.agents.map(async (agent) => {
+            // Fetch metrics for the current campaign and agent
+            const metrics = await Metrics.findOne({
+              agentId: agent.userId,
+              campaignId: campaign._id,
+            }).select('likes comments earnings'); // Select specific fields from Metrics
+
+            return {
+              ...agent.toObject(),
+              metrics: metrics || { likes: 0, comments: 0, earnings: 0 },  // Default values if no metrics found
+            };
+          })
+        );
+
+        return {
+          ...campaign.toObject(),
+          agents: updatedAgents,
+        };
+      })
+    );
+
+    // Respond with the campaigns and populated metrics
     res.status(200).json({
       message: "Campaigns retrieved successfully!",
-      campaigns,
+      campaigns: campaignsWithMetrics,
     });
   } catch (err) {
     console.error(err);
