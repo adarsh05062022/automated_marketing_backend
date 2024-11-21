@@ -30,7 +30,6 @@ export const updateMetrics = async (req, res) => {
   const agentId = req.user._id;
   const { campaignId } = req.params;
 
-
   try {
     // Step 1: Get the campaign and fetch the affiliated link (postId)
     const campaign = await Campaign.findById(campaignId);
@@ -60,7 +59,6 @@ export const updateMetrics = async (req, res) => {
       socialAccount.iv
     );
 
-
     // Step 3: Fetch engagement data from Instagram using the postId
     const insights = await getInstagramPostInsights(
       postId,
@@ -73,34 +71,30 @@ export const updateMetrics = async (req, res) => {
         .json({ error: "Error fetching Instagram insights" });
     }
 
-
-    console.log(insights)
-
+    console.log(insights);
 
     // Step 4: Update the metrics in the database
     let metrics = await Metrics.findOne({ agentId, campaignId });
     if (!metrics) {
       metrics = new Metrics({ agentId, campaignId });
     }
-    
+
     // Update the likes, comments, and earnings based on fetched data
     metrics.likes = Number(insights.data.media.like_count) || 0; // Default to 0 if NaN
     metrics.comments = Number(insights.data.media.comment_count) || 0; // Default to 0 if NaN
 
     // Step 5: Calculate payment based on engagement (for example, $0.10 per like and $0.05 per comment)
-    const earningsPerLike = 0.005; // Example rate
-    const earningsPerComment = 0.0025; // Example rate
+    const earningsPerLike = 0.035; // Example rate
+    const earningsPerComment = 0.05; // Example rate
     metrics.earnings =
       metrics.likes * earningsPerLike + metrics.comments * earningsPerComment;
 
     // Save the updated metrics
     await metrics.save();
 
-    console.log(metrics)
+    console.log(metrics);
 
-    res
-      .status(200)
-      .json(   metrics );
+    res.status(200).json(metrics);
   } catch (error) {
     console.error("Error updating metrics:", error);
     res.status(500).json({ error: "Error updating metrics" });
